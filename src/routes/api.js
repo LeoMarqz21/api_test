@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 const os = require('os');
+const { Database } = require('../database/database');
 const nktInterfaces = os.networkInterfaces();
 
 router.get('/api', (req, res)=>{
@@ -9,7 +10,24 @@ router.get('/api', (req, res)=>{
     });
 });
 
-router.get('/api/ip', (req, res)=>{
+router.get('/api/users', async (req, res)=>{
+    const db = new Database();
+    const con = db.getConnection();
+    const query = "SELECT * FROM users";
+    con.query(query, (error, result)=>{
+        if(error)
+            throw error;
+        res.json(
+            {
+                "message":"Aqui se hace uso de una base de datos mysql",
+                "data": result
+            }
+                
+        );
+    });
+});
+
+router.get('/api/v1/ip', (req, res)=>{
     let data = [];
     let alias = 0;
     Object.keys(nktInterfaces).forEach((interfaceName)=>{
@@ -29,14 +47,24 @@ router.get('/api/ip', (req, res)=>{
         })
     });
     res.json({
+        "version":"1",
         "message":"bienvenido, aqui estan mis interfaces de red y sus respectivas IPv4",
         "data": data
+    });
+});
+
+router.get('/api/v2/ip', (req, res)=>{
+    res.json({
+        "version":"2",
+        "message":"bienvenido, aqui estan mis interfaces de red y sus respectivas IPv4 v2",
+        "data": nktInterfaces
     });
 });
 
 router.get('/api/posts', (req, res)=>{
     res.json(
         {
+            "message":"datos staticos",
             "data":[
                 {
                     "id":1,
@@ -58,34 +86,6 @@ router.get('/api/posts', (req, res)=>{
     );
 });
 
-router.get('/api/users', (req, res)=>{
-    res.json(
-        {
-            "data":[
-                {
-                    "id":1001,
-                    "fullname":"Diego Francisco",
-                    "username":"dieguillo",
-                    "edad":25,
-                    "created_at":"25/05/2022"
-                },
-                {
-                    "id":1005,
-                    "fullname":"Lucas Perez",
-                    "username":"perezgil",
-                    "edad":45,
-                    "created_at":"25/10/2022"
-                },
-                {
-                    "id":1010,
-                    "fullname":"Antonio Guillermo",
-                    "username":"capi",
-                    "edad":18,
-                    "created_at":"25/11/2022"
-                },
-            ],
-        }
-    );
-});
+
 
 module.exports = router;
