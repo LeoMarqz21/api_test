@@ -1,10 +1,36 @@
-
 const { Router } = require('express');
 const router = Router();
+const os = require('os');
+const nktInterfaces = os.networkInterfaces();
 
 router.get('/api', (req, res)=>{
     res.json({
         "welcome":"Hello World !!"
+    });
+});
+
+router.get('/api/ip', (req, res)=>{
+    let data = [];
+    let alias = 0;
+    Object.keys(nktInterfaces).forEach((interfaceName)=>{
+        nktInterfaces[interfaceName].forEach((interface)=>{
+            if('IPv4' !== interface.family || interface.internal !== false)
+                return;
+            if(alias >= 1)
+            {
+                // this single interface has multiple ipv4 addresses
+                console.log(interfaceName + ':' + alias, interface.address);
+            }else
+            {
+                // this interface has only one ipv4 adress
+                data.push(`Interface: ${interfaceName} - IPv4: ${interface.address} `)
+                console.log(`Interface: ${interfaceName} - IPv4: ${interface.address} `);
+            }
+        })
+    });
+    res.json({
+        "message":"bienvenido, aqui estan mis interfaces de red y sus respectivas IPv4",
+        "data": data
     });
 });
 
